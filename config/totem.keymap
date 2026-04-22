@@ -33,18 +33,22 @@
 
 / {
     behaviors {
+        // rshft_ime: 右下端。tap=(呼び出し時指定、INS 想定)、hold=RSHIFT。
+        // 以前は tap=IME toggle macro を組込んでいたが、使用頻度が低く
+        // 右小指の IME toggle は撤去。bindings を kp/kp に戻し汎用化。
         rshft_ime: rshft_ime {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
-            flavor = "tap-preferred";
-            tapping-term-ms = <170>;
-            bindings = <&kp>, <&ime_toggle>;
+            flavor = "balanced";            // tap-preferred → balanced
+            tapping-term-ms = <500>;        // 170 → 500 (never-HOLD-alone)
+            quick-tap-ms = <200>;
+            bindings = <&kp>, <&kp>;        // IME macro 撤去
         };
         lctrl_ime: lctrl_ime {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
             flavor = "balanced";
-            tapping-term-ms = <170>;
+            tapping-term-ms = <500>;        // 170 → 500 (他 hold-tap と揃える)
             quick-tap-ms = <200>;
             bindings = <&kp>, <&kp>;
         };
@@ -52,9 +56,36 @@
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
             flavor = "balanced";
-            tapping-term-ms = <170>;
+            tapping-term-ms = <500>;        // 170 → 500 (never-HOLD-alone)
             quick-tap-ms = <200>;
             bindings = <&kp>, <&ime_toggle>;
+        };
+
+        // esc_tilde: 単独=ESC、Shift 併用=~ (TILDE)
+        esc_tilde: esc_tilde {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp ESC>, <&kp TILDE>;
+            mods = <(MOD_LSFT|MOD_RSFT)>;
+        };
+        // alt_esctilde: hold=LALT、tap=esc_tilde (= 上の mod-morph)
+        // BASE 左親指左端で Shift+tap → ~ を実現
+        alt_esctilde: alt_esctilde {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "balanced";
+            tapping-term-ms = <500>;
+            quick-tap-ms = <200>;
+            bindings = <&kp>, <&esc_tilde>;
+        };
+
+        // n1_tilde: 単独=1、Shift 併用=~
+        // SYM 左上 Q 位置で Shift+tap → ~ を実現 (従来は ! に解決されていた)
+        n1_tilde: n1_tilde {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp N1>, <&kp TILDE>;
+            mods = <(MOD_LSFT|MOD_RSFT)>;
         };
     };
 
@@ -117,8 +148,8 @@ label= "BASE"                              ;
 
                 &kp Q       &kp W       &kp E       &kp R       &kp T           &kp Y       &kp U       &kp I       &kp O       &kp P
                 &kp A       &kp S       &kp D       &lt FNC F   &kp G           &kp H       &mt RCTRL J &kp K       &kp L       &mt RSHFT MINUS
-&mt LSHFT TAB   &kp Z       &kp X       &kp C       &kp V       &kp B           &kp N       &kp M       &kp COMMA   &kp DOT     &kp FSLH    &rshft_ime RSHFT 0
-                          &mt LALT ESC &lgui_ime LGUI 0  &lctrl_ime LCTRL SPACE &lt SYM SPACE &lt FNC RET &lt EXT BSPC
+&mt LSHFT TAB   &kp Z       &kp X       &kp C       &kp V       &kp B           &kp N       &kp M       &kp COMMA   &kp DOT     &kp FSLH    &rshft_ime RSHFT INS
+                 &alt_esctilde LALT 0  &lgui_ime LGUI 0  &lctrl_ime LCTRL SPACE &lt SYM SPACE &lt FNC RET &lt EXT BSPC
                      >;
                 };
 
@@ -141,7 +172,7 @@ label= "SYM"                               ;
  bindings = <
 // ╷           ╷           ╷           ╷           ╷           ╷           ╷   ╷           ╷           ╷           ╷           ╷           ╷           ╷
 
-                &kp N1      &kp N2      &kp N3      &kp N4      &kp N5          &kp N6      &kp N7      &kp N8      &kp N9      &kp N0
+                &n1_tilde   &kp N2      &kp N3      &kp N4      &kp N5          &kp N6      &kp N7      &kp N8      &kp N9      &kp N0
                 &kp GRAVE   &kp AT      &kp HASH    &kp LBKT    &kp RBKT        &kp APOS    &kp EXCL    &kp QMARK   &kp APOS    &kp SEMI
  &mt LSHFT TAB   &kp DEL    &none       &none       &kp LPAR    &kp RPAR        &kp MINUS   &kp EQUAL   &kp PLUS    &kp FSLH    &kp BSLH    &mt RSHFT DEL
                                         &mt LALT ESC &kp LGUI   &mt LCTRL BSPC  &kp SPACE   &lt FNC RET &kp BSPC
