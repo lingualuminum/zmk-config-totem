@@ -55,8 +55,8 @@
         lgui_ime: lgui_ime {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
-            flavor = "balanced";
-            tapping-term-ms = <500>;        // 170 → 500 (never-HOLD-alone)
+            flavor = "hold-preferred";      // balanced → hold-preferred (CMD combo race 解消)
+            tapping-term-ms = <250>;        // 500 → 250 (tap 判定を速く)
             quick-tap-ms = <200>;
             bindings = <&kp>, <&ime_toggle>;
         };
